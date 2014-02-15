@@ -1,0 +1,44 @@
+.codeprev {
+	font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+	width: 100%;
+	border: none;
+	resize: none;
+	outline: none;
+	font-size: 12px;
+	border-left: 3px solid #333;
+	padding-left: 10px;
+	text-align: left;
+	margin-top: 20px;
+	position: relative;
+}
+.codeprev:before {
+	content: 'Code:';
+	position: absolute;
+	top: -20px;
+	left: -3px;
+	color: #000;
+}
+.codeprev span {
+	margin: 0;
+	padding: 0;
+}
+
+tb {
+	width: 15px;
+	display: inline-block;
+}
+.rtcc-sp { color: #00f; }
+.rtcc-el,
+.rtcc-sp
+{
+	color: navy;
+}
+.rtcc-cn {
+	color: teal;
+}
+.rtcc-cc {
+	color: #dd1144;
+}
+.rtcc-txt {
+	color: #000;
+}
