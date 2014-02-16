@@ -2,10 +2,11 @@ var s, RTHighlight = {
 	
 	settings: {
 		tab: '<tb></tb>',/*'&nbsp;&nbsp;',*/
-		nl: ["input", "br", "h1", "img", "a", "label"],	// ends on the same line
-		endNodes: ["input", "br", "img"],	// ends with / in same line
+		nl: [/*"input", "br", "img", */"h1", "h2", "a", "label", "span"],	// ends on the same line
+		endNodes: ["input", "img", "br"],	// ends with / in same line
 	},
 	content: '',
+	content2: '',
 	
 	init: function(options){
 		s 			= this.settings;
@@ -21,49 +22,78 @@ var s, RTHighlight = {
 		var a,b,c,d,e,f,g,h,i,y,z,
 			content = '';
 		for(a=0; a < el.length; a++){
+			this.content = '';
+			this.content2 = '';
 			this.linesLoop(el[a], a);
 			el[a].innerHTML = this.content;
+			//console.log(this.content);
 		}
 	},
 	linesLoop: function(el, index){
-		ln 		= el.localName;
-		console.log(el);
-
+		//ln 		= el.localName;
+		//console.log(el);
+//		console.log(this.gtabs(0));
 		if(el.children.length > 0){
 			// has child(s)
 			for (var i = 0; i < el.children.length; i++) {
 				els 		= el.children[i];
-				ln 			= el.children[i].localName;
+				//ln 			= el.children[i].localName;
 				adds		= '';
 				newLines	= '';
-				var tabs = s.tab, text ='';
+				var els 			= el.children[i],
+					ln 				= el.children[i].localName,
+					tabs			= '',
+					fnl				= '',
+					text 			= '',
+					oneLine			= false,	// moet eindigen op dezelfde regel inNewLine om te forceren
+					endSlash		= false,	// sluiten van de regel moet in dezelfde tag
+					tabCount 		= 0,		// tabs voor de tag
+					tabCountEnd		= 0,		// tabs voor het sluiten van de tag
+					sameLine		= false,	// in 1 regel
+					inNewLine		= false,	// in een nieuwe regel forceren
+					newLineAft		= '',
+					elText			= '';
+				if(this.inar(el.children[i].localName, s.endNodes)) endSlash = true; // eindigt op zelfde lijn met een />
+				//if(this.inar(ln, s.nl))				oneLine		= true;	// eindigt op zelfde lijn
+				if(els.getAttribute('rthtabs', 1)){	tabCount	= els.getAttribute('rthtabs', 1); }
+				if(els.getAttribute('RTHLine', 1) == 'true' || this.inar(ln, s.nl)){	sameLine	= true; }
+				if(els.getAttribute('rthnline',1)){	inNewLine	= true; }
+				if(els.getAttribute('rthtext', 1)){	elText		= els.getAttribute('rthtext', 1); }
 
-				if(!this.inar(ln, s.nl)){
-					newLines = '<br>';
+				if(sameLine == false){
+					endNewLine = '<br>'; newLine = '<br>';
+				} else {
+					endNewLine = ''; newLine = '';
 				}
-				//adds	+= this.getAttr(el.children[i].style);
+				//endNewLine			= (sameLine == true) ? '' : '<br>';
+				//newLine				= (sameLine == true) ? '' : '<br>';
+				console.log(sameLine + ', ' + endNewLine);
+				console.log(els);
+				tabCountEnd			= (sameLine == true) ? 0 : tabCount;
+				// als het 1 line moet zijn en het blijft 
+				if(els.getAttribute('rthtabs', 1))	tabCount	= els.getAttribute('rthtabs', 1);
 
-				// attributes
-				// for each ids
 				adds	+= this.getAttributes(els);
-				// tabs before element
-				if(els.attributes.rthtext)								text			= els.getAttribute('rthtext', 2);
-				// tabs before element
-				if(els.attributes.rthtabs)								tabs			+= this.rep(s.tab, (els.getAttribute('rthtabs', 2)));
-				// if element should be in 1 line and ends there
-				if(this.inar(ln, s.endNodes))							adds			+= '/';
+				
+				if(endSlash)											adds			+= '/';
 				
 				// open de tag
-				this.content		+= tabs+'<span class="RTH-el">&lt;'+el.children[i].localName+adds+'&gt;</span>'+newLines;
-				
-				if(!this.inar(el.children[i].localName, s.nl))			this.content	+= tabs+s.tab+text+'<br>';
-				if(this.inar(el.children[i].localName, s.nl))			this.content	+= text;
-				// loops for inner elements
+				this.content 		+= this.gtabs(tabCount) + this.genSpan('RTH-el', '&lt;'+ln);
+				this.content 		+= adds;
+				this.content 		+= this.genSpan('RTH-el', '&gt;');
+				this.content		+= newLine;
+				// tekst van het element
+				this.content 		+= elText;
+				// elementen binnen het element
 				this.linesLoop(el.children[i], i);
 
-				if(this.inar(el.children[i].localName, s.endNodes))		this.content 	+= '<br>';
-				if(!this.inar(el.children[i].localName, s.nl))			this.content 	+= tabs;
-				if(!this.inar(el.children[i].localName, s.endNodes))	this.content 	+= '<span class="RTH-el">&lt;/'+el.children[i].localName+'&gt;</span><br>';
+				endNewLine			= (sameLine == false) ? '<br>' : '';
+				newLineAft			= (sameLine == true || true) ? '<br>' : '';
+				// sltui het element af
+				//this.content 		+= endNewLine;
+				this.content 		+= this.gtabs(tabCountEnd) + this.genSpan('RTH-el', '&lt;/'+el.children[i].localName+'&gt;');
+				this.content 		+= newLineAft;
+
 			};
 		} else {
 			// no more childs
@@ -112,7 +142,7 @@ var s, RTHighlight = {
 		// if title
 		if(el.target) 			attributes 			+= ' '+this.genSpan('RTH-a', 'target=')+this.genSpan('RTH-at', '"'+el.target+'"');
 		// if title
-		if(el.rel) 			attributes 			+= ' '+this.genSpan('RTH-a', 'rel=')+this.genSpan('RTH-at', '"'+el.rel+'"');
+		if(el.rel) 				attributes 			+= ' '+this.genSpan('RTH-a', 'rel=')+this.genSpan('RTH-at', '"'+el.rel+'"');
 		// for each style attr
 		if(el.style[0])			attributes			+= ' '+this.getStyles(el)+'';
 
@@ -137,7 +167,18 @@ var s, RTHighlight = {
 	},
 
 	rep: function(string, n){
-		var content = '';for (var i = 0; i < n; i++) { content += string; };
+		if(n >= 0){
+			var content = '';for (var i = 0; i < n; i++) { content += string; };
+			return content;
+		}
+	},
+
+	gtabs: function(times){
+		//console.log(times);
+		var content = '';
+		for (var i = 0; i < times; i++) {
+			content += s.tab;
+		};
 		return content;
 	},
 
