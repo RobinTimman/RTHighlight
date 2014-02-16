@@ -2,8 +2,8 @@ var s, RTHighlight = {
 	
 	settings: {
 		tab: '<tb></tb>',/*'&nbsp;&nbsp;',*/
-		nl: ["input", "br", "h1"],	// ends on the same line
-		endNodes: ["input", "br"],	// ends with / in same line
+		nl: ["input", "br", "h1", "img", "a"],	// ends on the same line
+		endNodes: ["input", "br", "img"],	// ends with / in same line
 	},
 	content: '',
 	
@@ -22,13 +22,13 @@ var s, RTHighlight = {
 			content = '';
 		for(a=0; a < el.length; a++){
 			this.linesLoop(el[a], a);
-			//$(el).after( '<div class="btn-toolbar"><h4>Voorbeeld:</h4><div class="btn-group">'+$(el).html()+'</div></div>' );
-			$(el[a]).html( this.content );
+			el[a].innerHTML = this.content;
 		}
 	},
 	linesLoop: function(el, index){
 		ln 		= el.localName;
-		
+		console.log(el);
+
 		if(el.children.length > 0){
 			// has child(s)
 			for (var i = 0; i < el.children.length; i++) {
@@ -36,7 +36,7 @@ var s, RTHighlight = {
 				ln 			= el.children[i].localName;
 				adds		= '';
 				newLines	= '';
-				var tabs = '', text ='';
+				var tabs = s.tab, text ='';
 
 				if(!this.inar(ln, s.nl)){
 					newLines = '<br>';
@@ -49,7 +49,7 @@ var s, RTHighlight = {
 				// tabs before element
 				if(els.attributes.rthtext)								text			= els.getAttribute('rthtext', 2);
 				// tabs before element
-				if(els.attributes.rthtabs)								tabs			= this.rep(s.tab, els.getAttribute('rthtabs', 2));
+				if(els.attributes.rthtabs)								tabs			+= this.rep(s.tab, (els.getAttribute('rthtabs', 2)));
 				// if element should be in 1 line and ends there
 				if(this.inar(ln, s.endNodes))							adds			+= '/';
 				
@@ -76,8 +76,31 @@ var s, RTHighlight = {
 		if(el.id)				attributes			+= ' '+this.genSpan('RTH-a', 'id=')+this.genSpan('RTH-at', '"'+el.id+'"');
 		// for each classes
 		if(el.className)		attributes			+= ' '+this.genSpan('RTH-a', 'class=')+this.genSpan('RTH-at', '"'+el.className+'"');
+		// for each data tag
+		if(el.dataset){
+			for (var x in el.dataset) attributes 	+= ' '+this.genSpan('RTH-a', 'data-'+x+'=')+this.genSpan('RTH-at', '"'+el.dataset[x]+'"');
+		}
+		if(el.type)				attributes 			+= ' '+this.genSpan('RTH-a', 'type=')+this.genSpan('RTH-at', '"'+el.type+'"');
+		// if value
+		if(el.value) 			attributes 			+= ' '+this.genSpan('RTH-a', 'value=')+this.genSpan('RTH-at', '"'+el.type+'"');
+		// if name
+		if(el.name) 			attributes 			+= ' '+this.genSpan('RTH-a', 'name=')+this.genSpan('RTH-at', '"'+el.name+'"');
+		// if src (source)
+		if(el.src) 				attributes 			+= ' '+this.genSpan('RTH-a', 'src=')+this.genSpan('RTH-at', '"'+el.src+'"');
+		if(el.getAttribute('RTH-src', 2)){
+								attributes 			+= ' '+this.genSpan('RTH-a', 'src=')+this.genSpan('RTH-at', '"'+el.getAttribute('RTH-src', 2)+'"');
+		}
+		// if href
+		if(el.href) 			attributes 			+= ' '+this.genSpan('RTH-a', 'href=')+this.genSpan('RTH-at', '"'+el.href+'"');
+		// if method
+		if(el.method) 			attributes 			+= ' '+this.genSpan('RTH-a', 'method=')+this.genSpan('RTH-at', '"'+el.method+'"');
+		// if action
+		if(el.action) 			attributes 			+= ' '+this.genSpan('RTH-a', 'action=')+this.genSpan('RTH-at', '"'+el.action+'"');
+		if(el.getAttribute('RTH-action', 2)){
+								attributes 			+= ' '+this.genSpan('RTH-a', 'action=')+this.genSpan('RTH-at', '"'+el.getAttribute('RTH-action', 2)+'"');
+		}
 		// for each style attr
-		if(el.style[0])			attributes			+= ' '+this.getStyles(el)+'';		
+		if(el.style[0])			attributes			+= ' '+this.getStyles(el)+'';
 
 		return attributes;
 	},

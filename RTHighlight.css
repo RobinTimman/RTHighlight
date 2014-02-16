@@ -13,12 +13,13 @@
 	outline: none;
 	font-size: 12px;
 	border-left: 3px solid #333;
-	padding-left: 10px;
+	/*padding-left: 10px;*/
 	text-align: left;
 	margin-top: 25px;
 	position: relative;
 	color: #000;
-	overflow: auto;
+white-space:nowrap;
+overflow: auto;
 }
 .rt-item-footer h4 {
 	font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
